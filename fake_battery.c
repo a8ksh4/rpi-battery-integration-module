@@ -62,8 +62,8 @@ static struct battery_status {
 static int ac_status = 1;
 
 static char *fake_ac_supplies[] = {
-    "BAT0",
-    "BAT1",
+    "test_bat0",
+    "test_bat1",
 };
 
 static enum power_supply_property fake_battery_properties[] = {
@@ -92,7 +92,7 @@ static enum power_supply_property fake_ac_properties[] = {
 
 static struct power_supply_desc descriptions[] = {
     {
-        .name = "BAT0",
+        .name = "test_bat0",
         .type = POWER_SUPPLY_TYPE_BATTERY,
         .properties = fake_battery_properties,
         .num_properties = ARRAY_SIZE(fake_battery_properties),
@@ -100,7 +100,7 @@ static struct power_supply_desc descriptions[] = {
     },
 
     {
-        .name = "BAT1",
+        .name = "test_bat1",
         .type = POWER_SUPPLY_TYPE_BATTERY,
         .properties = fake_battery_properties,
         .num_properties = ARRAY_SIZE(fake_battery_properties),
@@ -141,7 +141,7 @@ control_device_read(struct file *file, char *buffer, size_t count, loff_t *ppos)
         return 0;
     }
 
-    if(copy_to_user(buffer, message, message_len)) {
+    if(raw_copy_to_user(buffer, message, message_len)) {
         return -EINVAL;
     }
 
@@ -237,7 +237,7 @@ control_device_write(struct file *file, const char *buffer, size_t count, loff_t
         return -EINVAL;
     }
 
-    status = copy_from_user(kbuffer, buffer, count);
+    status = raw_copy_from_user(kbuffer, buffer, count);
 
     if(status != 0) {
         printk(KERN_ERR "bad copy_from_user\n");
