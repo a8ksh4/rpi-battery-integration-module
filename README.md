@@ -1,15 +1,14 @@
-# Fake Battery Module for the Linux kernel
+# Battery Module 
+This is a spin-off from https://github.com/hoelzro/linux-fake-battery-module to make a kernel module for raspberry pi systems to integrate with max1704x, ads1015, etc voltage monitoring boards and enable us to have our external batteries visible to standard linux power management like a laptop, so we can see a battery gauge in the task bar and take advantage of any power management features.
 
-This is a kernel module I wrote (based mainly on the `test_power` module
-included in the Linux kernel source) for simulating multiple batteries on
-Linux.
+So short term goals are this:
+* Reduce the module to only having 1 batteryrather than 2
+* Get module loading and reporting on current 4.9 kernel in Raspberry Pi OS.
+* Implement simple OS service with some python code to query the battery reporting module and pass updates to the kernel module.
+* Work out specifics needed to get a battery gauge to show up on the task bar in RPi OS.
 
-This is my first module, so don't hold me responsible if you use it and it
-causes a kernel panic. =)
+## Installing the service and building the module
 
-This is something I wrote a while ago and am not actively maintaining, so
-don't be surprised if it doesn't compile against newer kernels or otherwise
-does not work!
 
 ## Loading the module
 
