@@ -8,7 +8,10 @@ So short term goals are this:
 * Work out specifics needed to get a battery gauge to show up on the task bar in RPi OS.
 
 ## Installing the service and building the module
-
+    $ sudo apt install git bc bison flex libssl-dev make raspberrypi-kernel-headers
+    $ cd rpi-battery-integration-module
+    # make
+    # 
 
 ## Loading the module
 
