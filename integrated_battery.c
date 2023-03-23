@@ -25,12 +25,7 @@
 #include <asm/uaccess.h>
 
 static int
-fake_battery_get_property1(struct power_supply *psy,
-        enum power_supply_property psp,
-        union power_supply_propval *val);
-
-static int
-fake_battery_get_property2(struct power_supply *psy,
+integrated_battery_get_property1(struct power_supply *psy,
         enum power_supply_property psp,
         union power_supply_propval *val);
 
@@ -44,7 +39,7 @@ static struct battery_status {
     int capacity_level;
     int capacity;
     int time_left;
-} fake_battery_statuses[2] = {
+} integrated_battery_statuses[2] = {
     {
         .status = POWER_SUPPLY_STATUS_FULL,
         .capacity_level = POWER_SUPPLY_CAPACITY_LEVEL_FULL,
@@ -62,11 +57,10 @@ static struct battery_status {
 static int ac_status = 1;
 
 static char *fake_ac_supplies[] = {
-    "test_bat0",
-    "test_bat1",
+    "BAT0",
 };
 
-static enum power_supply_property fake_battery_properties[] = {
+static enum power_supply_property integrated_battery_properties[] = {
     POWER_SUPPLY_PROP_STATUS,
     POWER_SUPPLY_PROP_CHARGE_TYPE,
     POWER_SUPPLY_PROP_HEALTH,
@@ -92,19 +86,11 @@ static enum power_supply_property fake_ac_properties[] = {
 
 static struct power_supply_desc descriptions[] = {
     {
-        .name = "test_bat0",
+        .name = "BAT0",
         .type = POWER_SUPPLY_TYPE_BATTERY,
-        .properties = fake_battery_properties,
-        .num_properties = ARRAY_SIZE(fake_battery_properties),
-        .get_property = fake_battery_get_property1,
-    },
-
-    {
-        .name = "test_bat1",
-        .type = POWER_SUPPLY_TYPE_BATTERY,
-        .properties = fake_battery_properties,
-        .num_properties = ARRAY_SIZE(fake_battery_properties),
-        .get_property = fake_battery_get_property2,
+        .properties = integrated_battery_properties,
+        .num_properties = ARRAY_SIZE(integrated_battery_properties),
+        .get_property = integrated_battery_get_property1,
     },
 
     {
@@ -228,12 +214,12 @@ control_device_write(struct file *file, const char *buffer, size_t count, loff_t
     int status;
 
     if(*ppos != 0) {
-        printk(KERN_ERR "writes to /dev/fake_battery must be completed in a single system call\n");
+        printk(KERN_ERR "writes to /dev/integrated_battery must be completed in a single system call\n");
         return -EINVAL;
     }
 
     if(count > 1024) {
-        printk(KERN_ERR "Too much data provided to /dev/fake_battery (limit 1024 bytes)\n");
+        printk(KERN_ERR "Too much data provided to /dev/integrated_battery (limit 1024 bytes)\n");
         return -EINVAL;
     }
 
@@ -249,7 +235,7 @@ control_device_write(struct file *file, const char *buffer, size_t count, loff_t
     while((newline = memchr(buffer_cursor, '\n', bytes_left))) {
         *newline = '\0';
         /* XXX this is non-atomic */
-        status = handle_control_line(buffer_cursor, &ac_status, fake_battery_statuses);
+        status = handle_control_line(buffer_cursor, &ac_status, integrated_battery_statuses);
 
         if(status) {
             return status;
@@ -259,12 +245,10 @@ control_device_write(struct file *file, const char *buffer, size_t count, loff_t
         buffer_cursor  = newline + 1;
     }
 
-    handle_charge_changes(ac_status, &fake_battery_statuses[0]);
-    handle_charge_changes(ac_status, &fake_battery_statuses[1]);
+    handle_charge_changes(ac_status, &integrated_battery_statuses[0]);
 
     power_supply_changed(supplies[0]);
     power_supply_changed(supplies[1]);
-    power_supply_changed(supplies[2]);
 
     return count;
 }
@@ -277,12 +261,12 @@ static struct file_operations control_device_ops = {
 
 static struct miscdevice control_device = {
     MISC_DYNAMIC_MINOR,
-    "fake_battery",
+    "integrated_battery",
     &control_device_ops,
 };
 
 static int
-fake_battery_generic_get_property(struct power_supply *psy,
+integrated_battery_generic_get_property(struct power_supply *psy,
         enum power_supply_property psp,
         union power_supply_propval *val,
         struct battery_status *status)
@@ -336,37 +320,19 @@ fake_battery_generic_get_property(struct power_supply *psy,
 };
 
 static int
-fake_battery_get_property1(struct power_supply *psy,
+integrated_battery_get_property1(struct power_supply *psy,
         enum power_supply_property psp,
         union power_supply_propval *val)
 {
     switch (psp) {
         case POWER_SUPPLY_PROP_MODEL_NAME:
-            val->strval = "Fake battery 1";
+            val->strval = "Integrated battery 1";
             break;
         case POWER_SUPPLY_PROP_SERIAL_NUMBER:
             val->strval = "12345678";
             break;
         default:
-            return fake_battery_generic_get_property(psy, psp, val, &fake_battery_statuses[0]);
-    }
-    return 0;
-}
-
-static int
-fake_battery_get_property2(struct power_supply *psy,
-        enum power_supply_property psp,
-        union power_supply_propval *val)
-{
-    switch (psp) {
-        case POWER_SUPPLY_PROP_MODEL_NAME:
-            val->strval = "Fake battery 2";
-            break;
-        case POWER_SUPPLY_PROP_SERIAL_NUMBER:
-            val->strval = "12345678";
-            break;
-        default:
-            return fake_battery_generic_get_property(psy, psp, val, &fake_battery_statuses[1]);
+            return integrated_battery_generic_get_property(psy, psp, val, &integrated_battery_statuses[0]);
     }
     return 0;
 }
@@ -387,7 +353,7 @@ fake_ac_get_property(struct power_supply *psy,
 }
 
 static int __init
-fake_battery_init(void)
+integrated_battery_init(void)
 {
     int result;
     int i;
@@ -401,12 +367,12 @@ fake_battery_init(void)
     for(i = 0; i < ARRAY_SIZE(descriptions); i++) {
         supplies[i] = power_supply_register(NULL, &descriptions[i], &configs[i]);
         if(IS_ERR(supplies[i])) {
-            printk(KERN_ERR "Unable to register power supply %d in fake_battery\n", i);
+            printk(KERN_ERR "Unable to register power supply %d in integrated_battery\n", i);
             goto error;
         }
     }
 
-    printk(KERN_INFO "loaded fake_battery module\n");
+    printk(KERN_INFO "loaded integrated_battery module\n");
     return 0;
 
 error:
@@ -418,7 +384,7 @@ error:
 }
 
 static void __exit
-fake_battery_exit(void)
+integrated_battery_exit(void)
 {
     int i;
 
@@ -428,10 +394,10 @@ fake_battery_exit(void)
         power_supply_unregister(supplies[i]);
     }
 
-    printk(KERN_INFO "unloaded fake_battery module\n");
+    printk(KERN_INFO "unloaded integrated_battery module\n");
 }
 
-module_init(fake_battery_init);
-module_exit(fake_battery_exit);
+module_init(integrated_battery_init);
+module_exit(integrated_battery_exit);
 
 MODULE_LICENSE("GPL");

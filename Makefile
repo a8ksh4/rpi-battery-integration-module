@@ -1,4 +1,4 @@
-obj-m += fake_battery.o
+obj-m += integrated_battery.o
 
 KERN_VER=$(shell uname -r)
 
