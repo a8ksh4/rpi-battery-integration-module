@@ -1,0 +1,18 @@
+[Unit]
+Description=BatteryUpdate
+DefaultDependencies=no
+
+[Service]
+Type=simple
+KillSignal=SIGINT
+TimeoutStopSec=8
+Restart=on-failure
+
+### Change the paths below to match yours
+WorkingDirectory=/home/dan/git/rpi-integrated-battery-module/
+ExecStart=/home/dan/git/rpi-integrated-battery-module/battery_update.py
+###
+
+[Install]
+WantedBy=sysinit.target
+
