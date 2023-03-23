@@ -4,10 +4,17 @@ import os
 import time
 import board
 import adafruit_max1704x
+import subprocess as sp
+
+MODULE = '/home/dan/git/rpi-integrated-battery-module/integrated_battery.ko'
 
 if __name__ == '__main__':
+    sp.call(['/sbin/insmod', MODULE])
+
     i2c = board.I2C()
     max17 = adafruit_max1704x.MAX17048(i2c)
+
+    print(dir(max17))
     
     max17.wake()
     max17.voltage_alert_min = 3.5
