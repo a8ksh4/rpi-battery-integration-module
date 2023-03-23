@@ -5,8 +5,10 @@ import time
 import board
 import adafruit_max1704x
 import subprocess as sp
+import sys
 
 MODULE = '/home/dan/git/rpi-integrated-battery-module/integrated_battery.ko'
+STATUS_FILE = '/home/dan/git/rpi-integrated-battery-module/status.log'
 
 if __name__ == '__main__':
     sp.call(['/sbin/insmod', MODULE])
@@ -24,20 +26,20 @@ if __name__ == '__main__':
     
     while True:
         time.sleep(15)
-        print()
-        print(f'Cell Voltage: {max17.cell_voltage:.2f} Volts')
-        print(f'Cell Percent: {max17.cell_percent:.1f} %')
-        print('Charge Rate:', max17.charge_rate)
-        if os.path.exists('/dev/integrated_battery'):
-            print('updating battery')
-            charging_status = 1 if max17.charge_rate > 0 else 0
-            try:
-                with open('/dev/integrated_battery', 'w') as f:
-                    f.write(f'capacity0 = {int(max17.cell_percent)}\n')
-                with open('/dev/integrated_battery', 'w') as f:
-                    f.write(f'charging = {charging_status}\n')
-            except Exception as e:
-                print("exceptin", e)
+        with open(STATUS_FILE, 'w') as sys.stdout:
+            print(f'Cell Voltage: {max17.cell_voltage:.2f} Volts')
+            print(f'Cell Percent: {max17.cell_percent:.1f} %')
+            print('Charge Rate:', max17.charge_rate)
+            if os.path.exists('/dev/integrated_battery'):
+                print('updating battery')
+                charging_status = 1 if max17.charge_rate > 0 else 0
+                try:
+                    with open('/dev/integrated_battery', 'w') as f:
+                        f.write(f'capacity0 = {int(max17.cell_percent)}\n')
+                    with open('/dev/integrated_battery', 'w') as f:
+                        f.write(f'charging = {charging_status}\n')
+                except Exception as e:
+                    print("exceptin", e)
     
         # if max17.hibernating:
         #     print("Hibernating!")
