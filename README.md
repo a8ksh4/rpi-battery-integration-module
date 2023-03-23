@@ -70,14 +70,12 @@ Add a symlink for the service, try starting it, and enable it to run at boot:
     
 If you see an error from the status command, try running battery_update.py manually and fix any issues reported.
 
-
 ## More info on how this works
 
-You can write values to `/dev/fake_battery` to change the current charging/discharging
-and charge levels of the battery:
+The kernel module created a character device at /dev/integrated_battery.  The service reads charge level over i2c from the battery monitor chip and passes the battery percent and charging status to the kernel module.  You can test this manually by echoing values to the module:
 
-    $ echo 'charging = 0' | sudo tee /dev/fake_battery # set state to discharging
-    $ echo 'charging = 1' | sudo tee /dev/fake_battery # set state to charging
-    $ echo 'capacity0 = 77' | sudo tee /dev/fake_battery # set charge on BAT0 to 77%
-    $ echo 'capacity1 = 77' | sudo tee /dev/fake_battery # set charge on BAT1 to 77%
+    $ sudo echo "charging = 0 > /dev/integrated_battery" # set the state to discharging
+    $ sudo echo "charging = 1 > /dev/integrated_battery" # set the state to charging
+    $ sudo echo "capacity0 = 75 > /dev/integrated_battery" # set the battery percent to 75
+
 
