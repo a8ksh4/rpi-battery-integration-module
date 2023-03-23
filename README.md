@@ -58,7 +58,7 @@ Update the paths to the rpi-integrated-battery-module in the following files/lin
 And install a couple needed packages and try running the script to check for errors:
 
     $ sudo apt install python3-pip python3-rpi.gpio
-    $ sudo pip3 install pip3 install adafruit-circuitpython-max1704x
+    $ sudo pip3 install adafruit-circuitpython-max1704x
     $ sudo ./battery_update.py
 
 Add a symlink for the service, try starting it, and enable it to run at boot:
