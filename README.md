@@ -1,4 +1,4 @@
-# Battery Module 
+# Overview 
 This is a spin-off from https://github.com/hoelzro/linux-fake-battery-module to make a kernel module and supporting OS service for raspberry pi (and other) systems to integrate with power supplies using the max1704x li-ion monitoring chip, like the Amp Ripper 4000 [Kickstarter Link](https://www.kickstarter.com/projects/ksd/ampripper-4000-next-gen-battery-charger-and-boost-module).  It should be totally possible to add support for the ads1015, used by the Retro PSU, and other chips.
 
 The kernel module creates a virtual battery in linux that is reported like a laptop battery on the taskbar, etc.  We run a service that queries the max1704x chip over i2c and relays the battery percent and charging status to the kernel module.
@@ -9,10 +9,10 @@ I tried using the kernel module on Raspberry Pi OS, and it works but the Lxde wi
 
 Feedback and contributions are welcome here.
 
-## Wiring and software setup:
+# Wiring and software setup:
 There are a few steps to set this up.  I check out the repo and run everything from the checkout dir, so there's no installer, just a some manual steps to enable it.
 
-### 1 - Wiring the power supply to the pi and enabling i2c:
+## 1 - Wiring the power supply to the pi and enabling i2c:
 Here's a wiring diagram for the Amp Ripper 4K. All that's needed are the i2c wires.  A 3rd wire can be added to the INT pin to trigger shutdown on low voltage if desired.  The max1704x is configurable per the voltage this happens at.
 
 <img src="/images/ar_pi_wiring.png" alt="ark wiring diagram" width="600"/>
@@ -35,7 +35,7 @@ Once attached, you can use i2cdetect to verify the pi can see the max1704x over 
     
 If you used different i2c pins on your pi, you might need to check available i2c bus devices with i2cdetect -l and query them instead.  I'm not sure offhand how this will affect the battery_update.pi.  Mihgt need to change an i2c addr in there.
 
-### 2 - Build the module and test it:
+## 2 - Build the module and test it:
 On Ubuntu, all of the needed packages were installed already, but on Raspberry pi OS, I needed to install a few packages:
 
     $ sudo apt install git bc bison flex libssl-dev make raspberrypi-kernel-headers
@@ -47,7 +47,7 @@ The Clone the repo and "make" the module:
 
 You should now see integrated_battery.ko listed.
 
-### 3 - Test and install the service
+## 3 - Test and install the service
 Update the paths to the rpi-integrated-battery-module in the following files/lines:
 
     ./battery_update.py:MODULE = '/home/dan/git/rpi-integrated-battery-module/integrated_battery.ko'
@@ -70,7 +70,7 @@ Add a symlink for the service, try starting it, and enable it to run at boot:
     
 If you see an error from the status command, try running battery_update.py manually and fix any issues reported.
 
-## More info on how this works
+# More info on how this works
 
 The kernel module created a character device at /dev/integrated_battery.  The service reads charge level over i2c from the battery monitor chip and passes the battery percent and charging status to the kernel module.  You can test this manually by echoing values to the module:
 
