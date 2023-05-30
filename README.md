@@ -36,7 +36,10 @@ Once attached, you can use i2cdetect to verify the pi can see the max1704x over 
 If you used different i2c pins on your pi, you might need to check available i2c bus devices with i2cdetect -l and query them instead.  I'm not sure offhand how this will affect the battery_update.pi.  Mihgt need to change an i2c addr in there.
 
 ## 2 - Build the module and test it:
-On Ubuntu, all of the needed packages were installed already, but on Raspberry pi OS, I needed to install a few packages:
+On Ubuntu, you might need to install:
+    $ sudo apt install build-essential
+
+On Raspberry pi OS, I needed to install a few packages:
 
     $ sudo apt install git bc bison flex libssl-dev make raspberrypi-kernel-headers
 
